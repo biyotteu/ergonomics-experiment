@@ -50,6 +50,12 @@ export interface QuizItem {
   answer_key: string;
 }
 
+/** 사전 배경지식 설문 항목 (1~5 Likert) */
+export interface PriorItem {
+  item_key: string;       // 응답 컬럼명에 사용 (prior_<item_key>)
+  label: string;          // 화면에 보이는 질문 문구
+}
+
 export interface ContentBundle {
   passages: Passage[];
   questions: Question[];
@@ -57,6 +63,7 @@ export interface ContentBundle {
   bluf: Bluf[];
   analogy: Analogy[];
   quiz: QuizItem[];
+  prior_knowledge: PriorItem[];
 }
 
 export interface TlxScores {
@@ -91,8 +98,8 @@ export interface ParticipantState {
   ui_order: [UIType, UIType];
   question_order: [string, string];
   interrupt_in: UIType;
-  prior_grad_descent: number | null;
-  prior_entropy: number | null;
+  /** 사전 설문 응답: { item_key: 1~5 } */
+  prior: Record<string, number>;
   results: Record<string, PerQuestionResult>;
   pref_ui: UIType | null;
   pref_reason: string;

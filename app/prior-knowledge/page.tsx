@@ -6,6 +6,7 @@ import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
 import { Stepper } from "@/components/Stepper";
 import { useExperimentStore } from "@/lib/store";
+import { useContent } from "@/lib/useContent";
 
 function Likert({
   label,
@@ -46,13 +47,39 @@ function Likert({
 export default function PriorKnowledge() {
   const router = useRouter();
   const setPrior = useExperimentStore((s) => s.setPrior);
-  const [gd, setGd] = useState(0);
-  const [ent, setEnt] = useState(0);
+  const { content, loading } = useContent();
+  const [values, setValues] = useState<Record<string, number>>({});
+
+  const items = content?.prior_knowledge ?? [];
+
+  const allAnswered = items.length > 0 && items.every((it) => values[it.item_key] !== undefined);
 
   const submit = () => {
-    setPrior(gd, ent);
+    setPrior(values);
     router.push("/practice");
   };
+
+  if (loading || !content) {
+    return (
+      <Container size="md">
+        <p className="text-muted">잠시만요...</p>
+      </Container>
+    );
+  }
+
+  if (items.length === 0) {
+    // 시트에 항목이 비어 있으면 페이지 자체 스킵
+    return (
+      <Container size="md">
+        <Stepper step={2} total={8} />
+        <h1 className="text-2xl font-semibold mb-2">사전 설문</h1>
+        <p className="text-muted mb-6">
+          설문 항목이 없습니다. 다음 단계로 진행해주세요.
+        </p>
+        <Button onClick={() => router.push("/practice")}>다음 →</Button>
+      </Container>
+    );
+  }
 
   return (
     <Container size="md">
@@ -63,20 +90,18 @@ export default function PriorKnowledge() {
       </p>
 
       <Card className="p-6">
-        <Likert
-          label="경사하강법(Gradient Descent)에 얼마나 익숙하신가요?"
-          value={gd}
-          onChange={setGd}
-        />
-        <Likert
-          label="정보 엔트로피(Information Entropy)에 얼마나 익숙하신가요?"
-          value={ent}
-          onChange={setEnt}
-        />
+        {items.map((it) => (
+          <Likert
+            key={it.item_key}
+            label={it.label}
+            value={values[it.item_key] ?? 0}
+            onChange={(n) => setValues((v) => ({ ...v, [it.item_key]: n }))}
+          />
+        ))}
       </Card>
 
       <div className="mt-8 flex justify-end">
-        <Button onClick={submit} disabled={!gd || !ent}>
+        <Button onClick={submit} disabled={!allAnswered}>
           다음 →
         </Button>
       </div>

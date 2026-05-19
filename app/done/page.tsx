@@ -8,7 +8,6 @@ import { useExperimentStore } from "@/lib/store";
 
 export default function Done() {
   const state = useExperimentStore();
-  const reset = useExperimentStore((s) => s.reset);
   const [status, setStatus] = useState<"idle" | "ok" | "fail">("idle");
   const [posting, setPosting] = useState(false);
 
@@ -24,8 +23,7 @@ export default function Done() {
           ui_order: state.ui_order,
           question_order: state.question_order,
           interrupt_in: state.interrupt_in,
-          prior_grad_descent: state.prior_grad_descent,
-          prior_entropy: state.prior_entropy,
+          prior: state.prior,
           results: state.results,
           pref_ui: state.pref_ui,
           pref_reason: state.pref_reason,
@@ -42,7 +40,8 @@ export default function Done() {
     }
   };
 
-  useEffect(() => { submit(); /* 한 번만 자동 제출 */ }, []);
+  useEffect(() => { submit(); /* 한 번만 자동 제출 */ // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const downloadBackup = () => {
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });

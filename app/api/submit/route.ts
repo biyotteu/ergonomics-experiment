@@ -3,20 +3,23 @@ import { NextResponse } from "next/server";
 export const runtime = "nodejs";
 
 function flatten(payload: any) {
-  // Google Sheet 한 행 = 한 참가자. 컬럼은 평탄화해서 보냄.
   const out: Record<string, any> = {
     participant_id: payload.participant_id,
     group: payload.group,
     ui_order: payload.ui_order?.join("|"),
     question_order: payload.question_order?.join("|"),
     interrupt_in: payload.interrupt_in,
-    prior_grad_descent: payload.prior_grad_descent ?? "",
-    prior_entropy: payload.prior_entropy ?? "",
     pref_ui: payload.pref_ui ?? "",
     pref_reason: payload.pref_reason ?? "",
     started_at: payload.started_at,
     submitted_at: payload.submitted_at,
   };
+
+  // 사전 설문: prior 객체를 prior_<key> 컬럼으로 평탄화
+  const prior = payload.prior || {};
+  Object.entries(prior).forEach(([k, v]) => {
+    out[`prior_${k}`] = v ?? "";
+  });
 
   const qids: string[] = payload.question_order || [];
   qids.forEach((qid, idx) => {

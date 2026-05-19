@@ -128,5 +128,15 @@
       "question_text": "정보 엔트로피가 0이 되는 경우는 어떤 경우인가?",
       "answer_key": "결과가 하나로 완전히 확정되어 불확실성이 전혀 없는 경우"
     }
+  ],
+  "prior_knowledge": [
+    {
+      "item_key": "grad_descent",
+      "label": "경사하강법(Gradient Descent)에 얼마나 익숙하신가요?"
+    },
+    {
+      "item_key": "entropy",
+      "label": "정보 엔트로피(Information Entropy)에 얼마나 익숙하신가요?"
+    }
   ]
 }

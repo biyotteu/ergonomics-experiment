@@ -1,42 +1,43 @@
 /**
  * 인간공학 실험용 Apps Script
  *
- * 사용 방법:
- * 1. https://sheets.new 에서 새 시트 생성
- * 2. 다음 탭들을 만들어 헤더 행 입력:
- *    - passages    : passage_id, text
- *    - questions   : question_id, set, topic, passage_id, question_text
- *    - chunks      : question_id, chunk_order, title, body, transition
- *    - bluf        : question_id, bullet_1, bullet_2, bullet_3
- *    - analogy     : question_id, analogy_text
- *    - quiz        : question_id, q_order, question_text, answer_key
- *    - responses   : (헤더는 자동 입력됨. 첫 응답이 들어올 때 한 번만)
- * 3. 확장 프로그램 > Apps Script 클릭
- * 4. 이 파일 내용을 그대로 붙여넣기 + 저장
- * 5. (선택) 변수 DASHBOARD_PASSWORD 값을 본인이 정한 비밀번호로 바꾸기
- * 6. 배포 > 새 배포 > 유형: 웹 앱
- *    - 다음 사용자 인증: 나
- *    - 액세스 권한: 모든 사용자
- *    → 발급된 웹앱 URL을 복사
+ * 시트 탭 (헤더):
+ *  - passages        : passage_id, text
+ *  - questions       : question_id, set, topic, passage_id, question_text
+ *  - chunks          : question_id, chunk_order, title, body, transition
+ *  - bluf            : question_id, bullet_1, bullet_2, bullet_3
+ *  - analogy         : question_id, analogy_text
+ *  - quiz            : question_id, q_order, question_text, answer_key
+ *  - prior_knowledge : item_key, label
+ *  - responses       : (자동 생성)
+ *
+ * 배포: 우상단 "배포 > 새 배포 > 웹 앱"
+ *   - 실행: 나 / 액세스: 모든 사용자
  */
 
-// ⚠ 대시보드 접근 비밀번호. 본인이 정한 값으로 바꾸세요.
-//    Vercel 환경변수 DASHBOARD_PASSWORD에도 동일한 값을 넣으세요.
+// 대시보드 접근 비밀번호 (본인이 정한 값으로 바꾸기)
 const DASHBOARD_PASSWORD = "change-me-please";
+
+const CONTENT_SHEETS = [
+  "passages",
+  "questions",
+  "chunks",
+  "bluf",
+  "analogy",
+  "quiz",
+  "prior_knowledge",
+];
 
 function doGet(e) {
   const action = (e && e.parameter && e.parameter.action) || "content";
-
-  if (action === "responses") {
-    return getResponses(e);
-  }
+  if (action === "responses") return getResponses(e);
   return getContent();
 }
 
 function getContent() {
   const ss = SpreadsheetApp.getActive();
   const result = {};
-  ["passages", "questions", "chunks", "bluf", "analogy", "quiz"].forEach((name) => {
+  CONTENT_SHEETS.forEach((name) => {
     const sheet = ss.getSheetByName(name);
     if (!sheet) {
       result[name] = [];

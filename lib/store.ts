@@ -16,8 +16,7 @@ const empty: ParticipantState = {
   ui_order: ["basic", "structured"],
   question_order: ["A1", "B1"],
   interrupt_in: "structured",
-  prior_grad_descent: null,
-  prior_entropy: null,
+  prior: {},
   results: {},
   pref_ui: null,
   pref_reason: "",
@@ -27,7 +26,7 @@ const empty: ParticipantState = {
 interface Store extends ParticipantState {
   init: (p: Partial<ParticipantState>) => void;
   reset: () => void;
-  setPrior: (gd: number, ent: number) => void;
+  setPrior: (prior: Record<string, number>) => void;
   ensureResult: (qid: string, ui: UIType) => void;
   updateResult: (qid: string, patch: Partial<PerQuestionResult>) => void;
   logChunkOpen: (qid: string, chunk_order: number) => void;
@@ -60,7 +59,7 @@ export const useExperimentStore = create<Store>()(
       ...empty,
       init: (p) => set({ ...empty, ...p, started_at: Date.now() }),
       reset: () => set({ ...empty }),
-      setPrior: (gd, ent) => set({ prior_grad_descent: gd, prior_entropy: ent }),
+      setPrior: (prior) => set({ prior }),
       ensureResult: (qid, ui) => {
         const cur = get().results[qid];
         if (!cur) {
