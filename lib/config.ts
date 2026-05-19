@@ -1,4 +1,6 @@
-import type { InterruptTrigger } from "./types";
+import type { InterruptTrigger, TlxScores } from "./types";
+
+type TlxDimension = { key: keyof TlxScores; label: string; desc: string };
 
 export const config = {
   // 카운터밸런싱 그룹 수 (2 또는 4)
@@ -26,7 +28,7 @@ export const config = {
     { a: 63, b: 49 },
     { a: 38, b: 54 },
     { a: 72, b: 39 },
-  ],
+  ] as { a: number; b: number }[],
 
   // NASA-TLX 6개 항목
   TLX_DIMENSIONS: [
@@ -36,5 +38,5 @@ export const config = {
     { key: "performance", label: "수행 (Performance)", desc: "본인이 얼마나 잘 수행했다고 느끼나요? (낮을수록 잘함)" },
     { key: "effort", label: "노력 (Effort)", desc: "목표 달성을 위해 얼마나 노력했나요?" },
     { key: "frustration", label: "좌절감 (Frustration)", desc: "얼마나 짜증/스트레스를 느꼈나요?" },
-  ] as const,
-} as const;
+  ] as TlxDimension[],
+};

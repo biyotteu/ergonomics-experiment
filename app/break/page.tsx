@@ -10,7 +10,7 @@ import { config } from "@/lib/config";
 
 export default function Break() {
   const router = useRouter();
-  const [left, setLeft] = useState(config.BREAK_DURATION_SEC);
+  const [left, setLeft] = useState<number>(config.BREAK_DURATION_SEC);
   const ui_order = useExperimentStore((s) => s.ui_order);
   const question_order = useExperimentStore((s) => s.question_order);
 
