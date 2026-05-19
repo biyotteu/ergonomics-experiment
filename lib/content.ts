@@ -7,14 +7,14 @@ import fallback from "@/data/content.json";
  */
 export async function getContent(): Promise<ContentBundle> {
   const url = process.env.SHEET_API_URL;
-  if (!url) return fallback as ContentBundle;
+  if (!url) return fallback as unknown as ContentBundle;
   try {
     const res = await fetch(url, { next: { revalidate: 3600 } });
     if (!res.ok) throw new Error(`Sheet API ${res.status}`);
     return (await res.json()) as ContentBundle;
   } catch (e) {
     console.warn("Falling back to local content:", e);
-    return fallback as ContentBundle;
+    return fallback as unknown as ContentBundle;
   }
 }
 

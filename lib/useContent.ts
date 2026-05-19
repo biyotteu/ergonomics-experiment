@@ -10,17 +10,17 @@ export function useContent() {
     let cancelled = false;
     const url = process.env.NEXT_PUBLIC_SHEET_API_URL;
     if (!url) {
-      setContent(fallback as ContentBundle);
+      setContent(fallback as unknown as ContentBundle);
       setLoading(false);
       return;
     }
     fetch(url)
       .then((r) => r.json())
       .then((data) => {
-        if (!cancelled) setContent(data);
+        if (!cancelled) setContent(data as ContentBundle);
       })
       .catch(() => {
-        if (!cancelled) setContent(fallback as ContentBundle);
+        if (!cancelled) setContent(fallback as unknown as ContentBundle);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
