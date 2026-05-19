@@ -13,16 +13,27 @@
  *    - responses   : (헤더는 자동 입력됨. 첫 응답이 들어올 때 한 번만)
  * 3. 확장 프로그램 > Apps Script 클릭
  * 4. 이 파일 내용을 그대로 붙여넣기 + 저장
- * 5. 배포 > 새 배포 > 유형: 웹 앱
+ * 5. (선택) 변수 DASHBOARD_PASSWORD 값을 본인이 정한 비밀번호로 바꾸기
+ * 6. 배포 > 새 배포 > 유형: 웹 앱
  *    - 다음 사용자 인증: 나
  *    - 액세스 권한: 모든 사용자
  *    → 발급된 웹앱 URL을 복사
- * 6. Vercel 프로젝트 환경변수에 추가:
- *    SHEET_API_URL=<위 URL>
- *    NEXT_PUBLIC_SHEET_API_URL=<위 URL>
  */
 
-function doGet() {
+// ⚠ 대시보드 접근 비밀번호. 본인이 정한 값으로 바꾸세요.
+//    Vercel 환경변수 DASHBOARD_PASSWORD에도 동일한 값을 넣으세요.
+const DASHBOARD_PASSWORD = "change-me-please";
+
+function doGet(e) {
+  const action = (e && e.parameter && e.parameter.action) || "content";
+
+  if (action === "responses") {
+    return getResponses(e);
+  }
+  return getContent();
+}
+
+function getContent() {
   const ss = SpreadsheetApp.getActive();
   const result = {};
   ["passages", "questions", "chunks", "bluf", "analogy", "quiz"].forEach((name) => {
@@ -51,6 +62,39 @@ function doGet() {
   );
 }
 
+function getResponses(e) {
+  const pwd = e && e.parameter && e.parameter.pwd;
+  if (pwd !== DASHBOARD_PASSWORD) {
+    return ContentService.createTextOutput(
+      JSON.stringify({ error: "unauthorized" })
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+  const ss = SpreadsheetApp.getActive();
+  const sheet = ss.getSheetByName("responses");
+  if (!sheet) {
+    return ContentService.createTextOutput(
+      JSON.stringify({ rows: [], headers: [] })
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+  const values = sheet.getDataRange().getValues();
+  if (values.length === 0) {
+    return ContentService.createTextOutput(
+      JSON.stringify({ rows: [], headers: [] })
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+  const headers = values[0];
+  const rows = values.slice(1)
+    .filter((r) => r.some((c) => c !== "" && c !== null))
+    .map((r) => {
+      const obj = {};
+      headers.forEach((h, i) => (obj[h] = r[i]));
+      return obj;
+    });
+  return ContentService.createTextOutput(
+    JSON.stringify({ headers: headers, rows: rows })
+  ).setMimeType(ContentService.MimeType.JSON);
+}
+
 function doPost(e) {
   try {
     const ss = SpreadsheetApp.getActive();
@@ -60,11 +104,9 @@ function doPost(e) {
     const data = JSON.parse(e.postData.contents);
     const keys = Object.keys(data);
 
-    // 첫 응답이면 헤더 자동 입력
     if (sheet.getLastRow() === 0) {
       sheet.appendRow(keys);
     } else {
-      // 기존 헤더와 다른 새 키가 있다면 끝에 추가
       const existing = sheet
         .getRange(1, 1, 1, Math.max(1, sheet.getLastColumn()))
         .getValues()[0]
@@ -77,7 +119,6 @@ function doPost(e) {
       }
     }
 
-    // 헤더 순서대로 값 채우기
     const headers = sheet
       .getRange(1, 1, 1, sheet.getLastColumn())
       .getValues()[0];
