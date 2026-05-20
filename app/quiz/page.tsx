@@ -1,13 +1,20 @@
 "use client";
-import React, { Suspense, useEffect, useRef, useState } from "react";
+import React, { Suspense, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Container } from "@/components/Container";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
 import { Stepper } from "@/components/Stepper";
+import { ReferenceView } from "@/components/ReferenceView";
 import { useExperimentStore } from "@/lib/store";
 import { useContent } from "@/lib/useContent";
-import { findQuiz } from "@/lib/content";
+import {
+  findQuiz,
+  findChunks,
+  findBluf,
+  findAnalogy,
+  findQuestion,
+} from "@/lib/content";
 import { now } from "@/lib/timing";
 import type { UIType } from "@/lib/types";
 
@@ -30,43 +37,92 @@ function QuizInner() {
     router.push(`/tlx?q=${qid}&ui=${ui}&phase=${phase}`);
   };
 
-  if (loading || !content) return <Container size="md"><p className="text-muted">로딩 중...</p></Container>;
+  if (loading || !content) {
+    return (
+      <Container size="md">
+        <p className="text-muted">잠시만요...</p>
+      </Container>
+    );
+  }
+
+  const question = findQuestion(content, qid);
+  const chunks = findChunks(content, qid);
+  const bluf = findBluf(content, qid);
+  const analogy = findAnalogy(content, qid);
   const quiz = findQuiz(content, qid);
 
+  if (!question || !bluf || !analogy) {
+    return (
+      <Container size="md">
+        <p className="text-muted">콘텐츠를 찾을 수 없습니다. (qid: {qid})</p>
+      </Container>
+    );
+  }
+
+  const bullets = [bluf.bullet_1, bluf.bullet_2, bluf.bullet_3];
+
   return (
-    <Container size="md">
+    <Container size="xl">
       <Stepper step={phase === 1 ? 4 : 6} total={8} />
-      <h1 className="text-2xl font-semibold mb-2">퀴즈</h1>
-      <p className="text-muted mb-6">
-        앞서 읽으신 내용을 바탕으로 두 문항에 답해주세요. 정답은 채점하지 않으며, 빈칸 없이 본인이
-        이해한 대로 작성해주시면 됩니다.
-      </p>
 
-      {quiz.map((q, i) => (
-        <Card key={q.q_order} className="p-6 mb-4">
-          <div className="text-xs font-semibold uppercase tracking-wider text-muted mb-2">
-            문항 {i + 1}
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold mb-1">퀴즈 (오픈북)</h1>
+        <p className="text-sm text-muted">
+          왼쪽 자료를 자유롭게 참고하면서 오른쪽 두 문항에 답해주세요.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-6">
+        {/* 좌측: 읽기 자료 */}
+        <div className="bg-bg lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100vh-80px)] lg:overflow-y-auto rounded-2xl border border-line p-5">
+          <div className="text-xs uppercase tracking-wider text-muted font-medium mb-3">
+            참고 자료
           </div>
-          <p className="font-medium text-ink mb-4">{q.question_text}</p>
-          <textarea
-            rows={4}
-            value={i === 0 ? a1 : a2}
-            onChange={(e) => (i === 0 ? setA1(e.target.value) : setA2(e.target.value))}
-            className="w-full border border-line rounded-xl px-4 py-3 text-sm leading-relaxed focus:outline-none focus:border-accent-600 focus:ring-2 focus:ring-accent-100 resize-none"
-            placeholder="답안을 작성해주세요"
+          <ReferenceView
+            ui={ui}
+            question_text={question.question_text}
+            chunks={chunks}
+            blufBullets={bullets}
+            analogyText={analogy.analogy_text}
           />
-        </Card>
-      ))}
+        </div>
 
-      <div className="mt-6 flex justify-end">
-        <Button onClick={submit} disabled={a1.trim() === "" || a2.trim() === ""}>
-          제출하고 다음으로 →
-        </Button>
+        {/* 우측: 퀴즈 폼 */}
+        <div>
+          {quiz.map((q, i) => (
+            <Card key={q.q_order} className="p-5 mb-4">
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted mb-2">
+                문항 {i + 1}
+              </div>
+              <p className="font-medium text-ink mb-4 leading-relaxed">{q.question_text}</p>
+              <textarea
+                rows={5}
+                value={i === 0 ? a1 : a2}
+                onChange={(e) => (i === 0 ? setA1(e.target.value) : setA2(e.target.value))}
+                className="w-full border border-line rounded-xl px-4 py-3 text-sm leading-relaxed focus:outline-none focus:border-accent-600 focus:ring-2 focus:ring-accent-100 resize-none"
+                placeholder="답안을 작성해주세요"
+              />
+            </Card>
+          ))}
+
+          <div className="flex justify-end">
+            <Button
+              onClick={submit}
+              disabled={a1.trim() === "" || a2.trim() === ""}
+            >
+              제출하고 다음으로 →
+            </Button>
+          </div>
+        </div>
       </div>
     </Container>
   );
 }
 
 export default function Quiz() {
-  return <Suspense fallback={null}><QuizInner /></Suspense>;
+  return (
+    <Suspense fallback={null}>
+      <QuizInner />
+    </Suspense>
+  );
 }

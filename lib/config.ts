@@ -9,19 +9,20 @@ export const config = {
   // 사전 배경지식 설문 표시 여부
   SHOW_PRIOR_KNOWLEDGE_SURVEY: true,
 
-  // 기본 인터럽션 트리거 (URL 쿼리로 override 가능)
-  DEFAULT_INTERRUPT_TRIGGER: "scroll40" as InterruptTrigger,
+  // 기본 인터럽션 트리거
+  //   "auto" → 구조화 UI = chunk3 (3번째 청크 펼침), 기본 UI = section3_scroll (3번째 섹션 위치 도달)
+  //   URL ?interrupt=... 로 일회성 override 가능
+  DEFAULT_INTERRUPT_TRIGGER: "auto" as InterruptTrigger,
 
-  // 트리거 조건 만족 후 모달 발동까지 지연 시간 (ms)
-  INTERRUPT_DELAY_MS: 5000,
+  // 트리거 조건 만족 후 모달 발동까지 지연 시간 (ms). 5000~8000 사이 무작위.
+  INTERRUPT_DELAY_MIN_MS: 5000,
+  INTERRUPT_DELAY_MAX_MS: 8000,
 
   // 휴식 시간 (초)
   BREAK_DURATION_SEC: 180,
 
-  // 모바일 차단 여부
   REQUIRE_DESKTOP: true,
 
-  // 인터럽션용 덧셈 문제 풀
   ARITHMETIC_PROBLEMS: [
     { a: 47, b: 38 },
     { a: 56, b: 27 },
@@ -30,7 +31,6 @@ export const config = {
     { a: 72, b: 39 },
   ] as { a: number; b: number }[],
 
-  // NASA-TLX 6개 항목
   TLX_DIMENSIONS: [
     { key: "mental", label: "정신적 요구 (Mental Demand)", desc: "얼마나 정신적으로 노력해야 했나요?" },
     { key: "physical", label: "신체적 요구 (Physical Demand)", desc: "얼마나 신체적으로 부담이 있었나요?" },

@@ -8,22 +8,21 @@ interface Props {
   blufBullets: string[];
   analogyText: string;
   onScroll?: (pct: number) => void;
+  /** 3번째 청크 본문이 화면에 처음 진입했을 때 호출 (한 번만) */
+  onSection3Visible?: () => void;
 }
 
-/**
- * BasicUI: ChatGPT처럼 구조 없이 응답을 한 화면에 쏟아냄.
- * - BLUF 없음 (그냥 도입부 단락으로 흐름)
- * - 청크 헤더 없음 (단락 구분만)
- * - 비유는 본문 끝에 일반 단락으로
- */
 export function BasicUI({
   question_text,
   chunks,
   blufBullets,
   analogyText,
   onScroll,
+  onSection3Visible,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  const section3Ref = useRef<HTMLParagraphElement>(null);
+  const section3FiredRef = useRef(false);
 
   useEffect(() => {
     if (!onScroll) return;
@@ -38,7 +37,25 @@ export function BasicUI({
     return () => window.removeEventListener("scroll", handler);
   }, [onScroll]);
 
-  // 단락 형태로 흐름 (BLUF → 청크 본문 → 비유)
+  useEffect(() => {
+    if (!onSection3Visible || !section3Ref.current) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && !section3FiredRef.current) {
+            section3FiredRef.current = true;
+            onSection3Visible();
+            observer.disconnect();
+            break;
+          }
+        }
+      },
+      { threshold: 0.3 } // 30% 이상 보이면 발동
+    );
+    observer.observe(section3Ref.current);
+    return () => observer.disconnect();
+  }, [onSection3Visible]);
+
   const intro = blufBullets.join(" ");
 
   return (
@@ -50,8 +67,12 @@ export function BasicUI({
 
       <p className="text-[15px] leading-7 text-ink mb-4">{intro}</p>
 
-      {chunks.map((c) => (
-        <p key={c.chunk_order} className="text-[15px] leading-7 text-ink mb-4 whitespace-pre-wrap">
+      {chunks.map((c, idx) => (
+        <p
+          key={c.chunk_order}
+          ref={idx === 2 ? section3Ref : undefined}
+          className="text-[15px] leading-7 text-ink mb-4 whitespace-pre-wrap"
+        >
           {c.body}
         </p>
       ))}

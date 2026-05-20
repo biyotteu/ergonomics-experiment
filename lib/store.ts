@@ -32,7 +32,13 @@ interface Store extends ParticipantState {
   logChunkOpen: (qid: string, chunk_order: number) => void;
   logBookmark: (qid: string, chunk_order: number) => void;
   setTlx: (qid: string, tlx: TlxScores) => void;
-  setInterrupt: (qid: string, lag: number, used: InterruptTrigger, correct: boolean) => void;
+  setInterrupt: (
+    qid: string,
+    lag: number,
+    used: InterruptTrigger,
+    delayMs: number,
+    correct: boolean
+  ) => void;
   setPref: (ui: UIType, reason: string) => void;
 }
 
@@ -50,6 +56,7 @@ const blankResult = (qid: string, ui: UIType): PerQuestionResult => ({
   tlx: { mental: 50, physical: 50, temporal: 50, performance: 50, effort: 50, frustration: 50 },
   interrupt_triggered: false,
   interrupt_trigger_used: null,
+  interrupt_delay_used_ms: null,
   arithmetic_correct: null,
 });
 
@@ -100,7 +107,7 @@ export const useExperimentStore = create<Store>()(
         set((s) => ({
           results: { ...s.results, [qid]: { ...s.results[qid], tlx } },
         })),
-      setInterrupt: (qid, lag, used, correct) =>
+      setInterrupt: (qid, lag, used, delayMs, correct) =>
         set((s) => ({
           results: {
             ...s.results,
@@ -109,6 +116,7 @@ export const useExperimentStore = create<Store>()(
               resumption_lag_ms: lag,
               interrupt_triggered: true,
               interrupt_trigger_used: used,
+              interrupt_delay_used_ms: delayMs,
               arithmetic_correct: correct,
             },
           },

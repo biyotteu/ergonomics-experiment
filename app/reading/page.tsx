@@ -1,5 +1,5 @@
 "use client";
-import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Container } from "@/components/Container";
 import { Button } from "@/components/Button";
@@ -13,6 +13,17 @@ import { now, onFirstScroll } from "@/lib/timing";
 import { useContent } from "@/lib/useContent";
 import { findChunks, findBluf, findAnalogy, findQuestion } from "@/lib/content";
 import type { InterruptTrigger, UIType } from "@/lib/types";
+
+function resolveTrigger(raw: InterruptTrigger, ui: UIType): InterruptTrigger {
+  if (raw !== "auto") return raw;
+  return ui === "structured" ? "chunk3" : "section3_scroll";
+}
+
+function randomDelayMs(): number {
+  const min = config.INTERRUPT_DELAY_MIN_MS;
+  const max = config.INTERRUPT_DELAY_MAX_MS;
+  return min + Math.random() * (max - min);
+}
 
 function ReadingInner() {
   const router = useRouter();
@@ -31,47 +42,45 @@ function ReadingInner() {
   const interrupt_in = store.interrupt_in;
 
   const enterTs = useRef(now());
-  const [chunk2OpenedAt, setChunk2OpenedAt] = useState<number | null>(null);
-  const [scrollPctReached, setScrollPctReached] = useState<number | null>(null);
+  const triggerRef = useRef<InterruptTrigger>("auto");
+  const delayUsedRef = useRef<number>(0);
+
+  const [triggerSignalAt, setTriggerSignalAt] = useState<number | null>(null);
   const [modalProblem, setModalProblem] = useState<{ a: number; b: number } | null>(null);
   const [interruptDone, setInterruptDone] = useState(false);
 
   const { content, loading } = useContent();
 
-  const trigger: InterruptTrigger =
-    (triggerOverride || config.DEFAULT_INTERRUPT_TRIGGER) as InterruptTrigger;
+  const trigger = resolveTrigger(
+    (triggerOverride || config.DEFAULT_INTERRUPT_TRIGGER) as InterruptTrigger,
+    ui
+  );
+  triggerRef.current = trigger;
+
   const shouldInterrupt = ui === interrupt_in && !interruptDone;
 
   useEffect(() => {
     if (content) ensureResult(qid, ui);
   }, [content, qid, ui, ensureResult]);
 
-  // 시간 기반 트리거
+  // 시간 기반 트리거 (호환)
   useEffect(() => {
-    if (!shouldInterrupt) return;
+    if (!shouldInterrupt || triggerSignalAt !== null) return;
     if (trigger !== "time45" && trigger !== "time60") return;
     const sec = trigger === "time45" ? 45 : 60;
-    const t = setTimeout(() => fireInterrupt(), sec * 1000);
+    const t = setTimeout(() => setTriggerSignalAt(now()), sec * 1000);
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trigger, shouldInterrupt]);
+  }, [trigger, shouldInterrupt, triggerSignalAt]);
 
-  // 청크2 기반 트리거 (StructuredUI)
+  // 트리거 시그널 후 5~8초 무작위 지연으로 모달 발동
   useEffect(() => {
-    if (!shouldInterrupt || trigger !== "chunk2" || chunk2OpenedAt === null) return;
-    const t = setTimeout(() => fireInterrupt(), config.INTERRUPT_DELAY_MS);
+    if (triggerSignalAt === null || !shouldInterrupt) return;
+    const delay = randomDelayMs();
+    delayUsedRef.current = delay;
+    const t = setTimeout(() => fireInterrupt(), delay);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trigger, shouldInterrupt, chunk2OpenedAt]);
-
-  // 스크롤 % 기반 트리거 (BasicUI)
-  useEffect(() => {
-    if (!shouldInterrupt || scrollPctReached === null) return;
-    if (!["scroll30", "scroll40", "scroll50"].includes(trigger)) return;
-    const t = setTimeout(() => fireInterrupt(), config.INTERRUPT_DELAY_MS);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trigger, shouldInterrupt, scrollPctReached]);
+  }, [triggerSignalAt, shouldInterrupt]);
 
   const fireInterrupt = () => {
     if (interruptDone || modalProblem) return;
@@ -86,19 +95,32 @@ function ReadingInner() {
     setInterruptDone(true);
     onFirstScroll((scrollTs) => {
       const lag = scrollTs - closeTs;
-      setInterrupt(qid, lag, trigger, correct);
+      setInterrupt(qid, lag, triggerRef.current, delayUsedRef.current, correct);
     });
   };
 
+  // BasicUI 스크롤 % 트리거 (호환 - scroll30/40/50)
   const onScrollPct = (pct: number) => {
-    if (scrollPctReached !== null) return;
-    const threshold = trigger === "scroll30" ? 30 : trigger === "scroll40" ? 40 : trigger === "scroll50" ? 50 : null;
-    if (threshold !== null && pct >= threshold) setScrollPctReached(pct);
+    if (!shouldInterrupt || triggerSignalAt !== null) return;
+    const threshold =
+      trigger === "scroll30" ? 30 :
+      trigger === "scroll40" ? 40 :
+      trigger === "scroll50" ? 50 : null;
+    if (threshold !== null && pct >= threshold) setTriggerSignalAt(now());
   };
 
+  // BasicUI: 3번째 섹션 위치 가시 → section3_scroll 트리거
+  const onSection3Visible = () => {
+    if (!shouldInterrupt || triggerSignalAt !== null) return;
+    if (trigger === "section3_scroll") setTriggerSignalAt(now());
+  };
+
+  // StructuredUI: 청크 펼침 → chunk2 / chunk3 트리거
   const onChunkOpen = (order: number) => {
     logChunkOpen(qid, order);
-    if (order === 2 && chunk2OpenedAt === null) setChunk2OpenedAt(now());
+    if (!shouldInterrupt || triggerSignalAt !== null) return;
+    if (trigger === "chunk3" && order === 3) setTriggerSignalAt(now());
+    else if (trigger === "chunk2" && order === 2) setTriggerSignalAt(now());
   };
 
   const goQuiz = () => {
@@ -110,7 +132,7 @@ function ReadingInner() {
   if (loading || !content) {
     return (
       <Container size="lg">
-        <p className="text-muted">콘텐츠를 불러오는 중입니다...</p>
+        <p className="text-muted">잠시만요...</p>
       </Container>
     );
   }
@@ -147,6 +169,7 @@ function ReadingInner() {
           blufBullets={bullets}
           analogyText={analogy.analogy_text}
           onScroll={onScrollPct}
+          onSection3Visible={onSection3Visible}
         />
       ) : (
         <StructuredUI

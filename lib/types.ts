@@ -3,12 +3,12 @@ export type UIType = "basic" | "structured";
 export type GroupId = "G1" | "G2" | "G3" | "G4";
 
 export type InterruptTrigger =
-  | "scroll30"
-  | "scroll40"
-  | "scroll50"
-  | "time45"
-  | "time60"
-  | "chunk2";
+  | "auto"              // UI에 따라 자동 선택 (구조화→chunk3, 기본→section3_scroll)
+  | "chunk3"            // 3번째 청크 펼친 후 (StructuredUI 전용)
+  | "section3_scroll"   // 3번째 섹션 위치 도달 후 (BasicUI 전용)
+  | "scroll30" | "scroll40" | "scroll50"   // 호환: 스크롤 %
+  | "time45" | "time60"                    // 호환: 시간 기반
+  | "chunk2";                              // 호환: 2번째 청크
 
 export interface Passage {
   passage_id: string;
@@ -50,10 +50,9 @@ export interface QuizItem {
   answer_key: string;
 }
 
-/** 사전 배경지식 설문 항목 (1~5 Likert) */
 export interface PriorItem {
-  item_key: string;       // 응답 컬럼명에 사용 (prior_<item_key>)
-  label: string;          // 화면에 보이는 질문 문구
+  item_key: string;
+  label: string;
 }
 
 export interface ContentBundle {
@@ -89,6 +88,7 @@ export interface PerQuestionResult {
   tlx: TlxScores;
   interrupt_triggered: boolean;
   interrupt_trigger_used: InterruptTrigger | null;
+  interrupt_delay_used_ms: number | null;   // 발동된 랜덤 지연값
   arithmetic_correct: boolean | null;
 }
 
@@ -98,7 +98,6 @@ export interface ParticipantState {
   ui_order: [UIType, UIType];
   question_order: [string, string];
   interrupt_in: UIType;
-  /** 사전 설문 응답: { item_key: 1~5 } */
   prior: Record<string, number>;
   results: Record<string, PerQuestionResult>;
   pref_ui: UIType | null;

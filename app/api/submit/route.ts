@@ -34,7 +34,9 @@ function flatten(payload: any) {
     out[`${p}_resumption_lag_ms`] = r.resumption_lag_ms ?? "";
     out[`${p}_interrupt_triggered`] = r.interrupt_triggered ? 1 : 0;
     out[`${p}_interrupt_trigger_used`] = r.interrupt_trigger_used ?? "";
-    out[`${p}_arithmetic_correct`] = r.arithmetic_correct === null ? "" : r.arithmetic_correct ? 1 : 0;
+    out[`${p}_interrupt_delay_used_ms`] = r.interrupt_delay_used_ms ?? "";
+    out[`${p}_arithmetic_correct`] =
+      r.arithmetic_correct === null ? "" : r.arithmetic_correct ? 1 : 0;
     out[`${p}_quiz_ans1`] = r.quiz_ans_1;
     out[`${p}_quiz_ans2`] = r.quiz_ans_2;
     out[`${p}_quiz_time_auto_ms`] = r.quiz_time_auto_ms;
