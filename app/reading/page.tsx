@@ -11,7 +11,7 @@ import { useExperimentStore } from "@/lib/store";
 import { config } from "@/lib/config";
 import { now, onFirstScroll } from "@/lib/timing";
 import { useContent } from "@/lib/useContent";
-import { findChunks, findBluf, findAnalogy, findQuestion } from "@/lib/content";
+import { findChunks, findBluf, findQuestion } from "@/lib/content";
 import type { InterruptTrigger, UIType } from "@/lib/types";
 
 function resolveTrigger(raw: InterruptTrigger, ui: UIType): InterruptTrigger {
@@ -99,7 +99,7 @@ function ReadingInner() {
     });
   };
 
-  // BasicUI 스크롤 % 트리거 (호환 - scroll30/40/50)
+  // BasicUI 스크롤 % 트리거 (호환)
   const onScrollPct = (pct: number) => {
     if (!shouldInterrupt || triggerSignalAt !== null) return;
     const threshold =
@@ -140,17 +140,14 @@ function ReadingInner() {
   const question = findQuestion(content, qid);
   const chunks = findChunks(content, qid);
   const bluf = findBluf(content, qid);
-  const analogy = findAnalogy(content, qid);
 
-  if (!question || !bluf || !analogy) {
+  if (!question || !bluf) {
     return (
       <Container size="lg">
         <p className="text-muted">콘텐츠를 찾을 수 없습니다. (qid: {qid})</p>
       </Container>
     );
   }
-
-  const bullets = [bluf.bullet_1, bluf.bullet_2, bluf.bullet_3];
 
   return (
     <Container size="xl">
@@ -166,8 +163,6 @@ function ReadingInner() {
         <BasicUI
           question_text={question.question_text}
           chunks={chunks}
-          blufBullets={bullets}
-          analogyText={analogy.analogy_text}
           onScroll={onScrollPct}
           onSection3Visible={onSection3Visible}
         />
@@ -175,8 +170,7 @@ function ReadingInner() {
         <StructuredUI
           question_text={question.question_text}
           chunks={chunks}
-          blufBullets={bullets}
-          analogyText={analogy.analogy_text}
+          blufText={bluf.text}
           onChunkOpen={onChunkOpen}
           onBookmark={(o) => logBookmark(qid, o)}
         />

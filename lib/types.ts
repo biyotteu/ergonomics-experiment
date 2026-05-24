@@ -3,12 +3,12 @@ export type UIType = "basic" | "structured";
 export type GroupId = "G1" | "G2" | "G3" | "G4";
 
 export type InterruptTrigger =
-  | "auto"              // UI에 따라 자동 선택 (구조화→chunk3, 기본→section3_scroll)
-  | "chunk3"            // 3번째 청크 펼친 후 (StructuredUI 전용)
-  | "section3_scroll"   // 3번째 섹션 위치 도달 후 (BasicUI 전용)
-  | "scroll30" | "scroll40" | "scroll50"   // 호환: 스크롤 %
-  | "time45" | "time60"                    // 호환: 시간 기반
-  | "chunk2";                              // 호환: 2번째 청크
+  | "auto"
+  | "chunk3"
+  | "section3_scroll"
+  | "scroll30" | "scroll40" | "scroll50"
+  | "time45" | "time60"
+  | "chunk2";
 
 export interface Passage {
   passage_id: string;
@@ -23,24 +23,20 @@ export interface Question {
   question_text: string;
 }
 
+/** 섹션(청크). 각 섹션은 자체 비유를 가진다. */
 export interface Chunk {
   question_id: string;
   chunk_order: number;
   title: string;
+  analogy: string;   // 섹션별 "공의 굴러내림으로 이해하기" 비유
   body: string;
   transition: string;
 }
 
+/** BLUF는 한 단락 텍스트 */
 export interface Bluf {
   question_id: string;
-  bullet_1: string;
-  bullet_2: string;
-  bullet_3: string;
-}
-
-export interface Analogy {
-  question_id: string;
-  analogy_text: string;
+  text: string;
 }
 
 export interface QuizItem {
@@ -60,7 +56,6 @@ export interface ContentBundle {
   questions: Question[];
   chunks: Chunk[];
   bluf: Bluf[];
-  analogy: Analogy[];
   quiz: QuizItem[];
   prior_knowledge: PriorItem[];
 }
@@ -88,7 +83,7 @@ export interface PerQuestionResult {
   tlx: TlxScores;
   interrupt_triggered: boolean;
   interrupt_trigger_used: InterruptTrigger | null;
-  interrupt_delay_used_ms: number | null;   // 발동된 랜덤 지연값
+  interrupt_delay_used_ms: number | null;
   arithmetic_correct: boolean | null;
 }
 

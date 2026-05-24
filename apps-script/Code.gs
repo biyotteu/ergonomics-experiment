@@ -4,9 +4,8 @@
  * 시트 탭 (헤더):
  *  - passages        : passage_id, text
  *  - questions       : question_id, set, topic, passage_id, question_text
- *  - chunks          : question_id, chunk_order, title, body, transition
- *  - bluf            : question_id, bullet_1, bullet_2, bullet_3
- *  - analogy         : question_id, analogy_text
+ *  - chunks          : question_id, chunk_order, title, analogy, body, transition
+ *  - bluf            : question_id, text
  *  - quiz            : question_id, q_order, question_text, answer_key
  *  - prior_knowledge : item_key, label
  *  - responses       : (자동 생성)
@@ -23,7 +22,6 @@ const CONTENT_SHEETS = [
   "questions",
   "chunks",
   "bluf",
-  "analogy",
   "quiz",
   "prior_knowledge",
 ];

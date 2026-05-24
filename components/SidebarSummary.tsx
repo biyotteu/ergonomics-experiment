@@ -1,30 +1,67 @@
 "use client";
 import React from "react";
 
+interface SectionItem {
+  order: number;
+  title: string;
+  read: boolean;
+}
+
 interface Props {
-  bullets: string[];
+  blufText: string;
+  sections: SectionItem[];
   bookmarks: { order: number; title: string }[];
-  lastRead?: number;
+  currentSection?: number;
   onJump: (order: number) => void;
 }
 
-export function SidebarSummary({ bullets, bookmarks, lastRead, onJump }: Props) {
+/**
+ * 요약 사이드바: 목차(읽음 여부 표시) + BLUF + 북마크.
+ * 진행 상태 표시(Progress Indicator)는 목차와 기능이 중복되어 제거됨 (팀 결정 2026-05-20).
+ */
+export function SidebarSummary({
+  blufText,
+  sections,
+  bookmarks,
+  currentSection,
+  onJump,
+}: Props) {
   return (
     <aside className="sticky top-6 self-start space-y-4 hidden lg:block">
+      {/* 목차 */}
       <div className="bg-card border border-line rounded-2xl p-5 shadow-card">
         <div className="text-xs font-semibold uppercase tracking-wider text-muted mb-3">
-          요약
+          목차
         </div>
-        <ul className="space-y-2 text-[13px] leading-relaxed text-ink">
-          {bullets.map((b, i) => (
-            <li key={i} className="flex gap-2">
-              <span className="mt-1.5 w-1 h-1 rounded-full bg-accent-600 flex-shrink-0" />
-              <span>{b}</span>
+        <ul className="space-y-1.5">
+          {sections.map((s) => (
+            <li key={s.order}>
+              <button
+                type="button"
+                onClick={() => onJump(s.order)}
+                className={`flex items-center gap-2 text-left text-sm w-full ${
+                  s.order === currentSection
+                    ? "font-semibold text-ink"
+                    : "text-muted hover:text-ink"
+                }`}
+              >
+                <span aria-hidden>{s.read ? "✓" : "○"}</span>
+                <span>{s.title}</span>
+              </button>
             </li>
           ))}
         </ul>
       </div>
 
+      {/* BLUF 요약 */}
+      <div className="bg-card border border-line rounded-2xl p-5 shadow-card">
+        <div className="text-xs font-semibold uppercase tracking-wider text-muted mb-2">
+          핵심 요약
+        </div>
+        <p className="text-[13px] leading-relaxed text-ink">{blufText}</p>
+      </div>
+
+      {/* 북마크 */}
       <div className="bg-card border border-line rounded-2xl p-5 shadow-card">
         <div className="text-xs font-semibold uppercase tracking-wider text-muted mb-3">
           북마크
@@ -40,28 +77,13 @@ export function SidebarSummary({ bullets, bookmarks, lastRead, onJump }: Props) 
                   onClick={() => onJump(b.order)}
                   className="text-left text-sm text-ink hover:text-accent-700"
                 >
-                  {String(b.order).padStart(2, "0")}. {b.title}
+                  섹션 {b.order}. {b.title}
                 </button>
               </li>
             ))}
           </ul>
         )}
       </div>
-
-      {lastRead && (
-        <div className="bg-card border border-line rounded-2xl p-5 shadow-card">
-          <div className="text-xs font-semibold uppercase tracking-wider text-muted mb-2">
-            마지막 위치
-          </div>
-          <button
-            type="button"
-            onClick={() => onJump(lastRead)}
-            className="text-sm text-ink hover:text-accent-700"
-          >
-            청크 {lastRead}로 이동 →
-          </button>
-        </div>
-      )}
     </aside>
   );
 }

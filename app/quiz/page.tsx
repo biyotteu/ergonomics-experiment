@@ -8,13 +8,7 @@ import { Stepper } from "@/components/Stepper";
 import { ReferenceView } from "@/components/ReferenceView";
 import { useExperimentStore } from "@/lib/store";
 import { useContent } from "@/lib/useContent";
-import {
-  findQuiz,
-  findChunks,
-  findBluf,
-  findAnalogy,
-  findQuestion,
-} from "@/lib/content";
+import { findQuiz, findChunks, findBluf, findQuestion } from "@/lib/content";
 import { now } from "@/lib/timing";
 import type { UIType } from "@/lib/types";
 
@@ -48,18 +42,15 @@ function QuizInner() {
   const question = findQuestion(content, qid);
   const chunks = findChunks(content, qid);
   const bluf = findBluf(content, qid);
-  const analogy = findAnalogy(content, qid);
   const quiz = findQuiz(content, qid);
 
-  if (!question || !bluf || !analogy) {
+  if (!question || !bluf) {
     return (
       <Container size="md">
         <p className="text-muted">콘텐츠를 찾을 수 없습니다. (qid: {qid})</p>
       </Container>
     );
   }
-
-  const bullets = [bluf.bullet_1, bluf.bullet_2, bluf.bullet_3];
 
   return (
     <Container size="xl">
@@ -82,8 +73,7 @@ function QuizInner() {
             ui={ui}
             question_text={question.question_text}
             chunks={chunks}
-            blufBullets={bullets}
-            analogyText={analogy.analogy_text}
+            blufText={bluf.text}
           />
         </div>
 
@@ -106,10 +96,7 @@ function QuizInner() {
           ))}
 
           <div className="flex justify-end">
-            <Button
-              onClick={submit}
-              disabled={a1.trim() === "" || a2.trim() === ""}
-            >
+            <Button onClick={submit} disabled={a1.trim() === "" || a2.trim() === ""}>
               제출하고 다음으로 →
             </Button>
           </div>
