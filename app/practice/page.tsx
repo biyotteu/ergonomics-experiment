@@ -12,25 +12,29 @@ import { useExperimentStore } from "@/lib/store";
 const DEMO_BLUF =
   "이것은 연습용 화면입니다. 실제 실험과 동일한 UI 요소를 미리 체험해보고, 준비되면 실험을 시작하세요.";
 
+// 연습용 데모 섹션. 섹션 1만 비유 박스 데모, 섹션 2/3은 일반 안내(note).
 const DEMO_CHUNKS = [
   {
     order: 1,
     title: "이 카드가 섹션입니다",
     analogy: "비유 박스는 이렇게 점선 테두리로 표시됩니다. 개념을 친숙한 예시로 먼저 설명합니다.",
+    note: "",
     body: "한 섹션에는 하나의 소주제가 담깁니다. 섹션 제목을 클릭하면 펼치고 접을 수 있습니다.",
     transition: "다음 섹션도 펼쳐보세요",
   },
   {
     order: 2,
     title: "기본은 접혀 있습니다",
-    analogy: "필요할 때 하나씩 펼쳐 읽으면 됩니다.",
+    analogy: "",
+    note: "필요할 때 섹션을 하나씩 펼쳐 읽으면 됩니다.",
     body: "모든 섹션은 접힌 상태로 시작합니다. 위에서부터 순서대로 펼쳐 읽는 것을 권장합니다.",
     transition: "마지막 섹션입니다",
   },
   {
     order: 3,
     title: "북마크 기능",
-    analogy: "읽던 위치를 표시해두면 인터럽션 후에도 빠르게 돌아올 수 있습니다.",
+    analogy: "",
+    note: "읽던 위치를 표시해두면 인터럽션 후에도 빠르게 돌아올 수 있습니다.",
     body: "각 섹션 안의 '여기까지 읽었어요' 버튼을 누르면 오른쪽 사이드바에 표시됩니다.",
     transition: "",
   },
@@ -65,6 +69,7 @@ export default function Practice() {
             total={DEMO_CHUNKS.length}
             title={c.title}
             analogy={c.analogy}
+            note={c.note}
             body={c.body}
             transition={c.transition}
             open={!!openMap[c.order]}

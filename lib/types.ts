@@ -92,7 +92,6 @@ export interface ParticipantState {
   group: GroupId;
   ui_order: [UIType, UIType];
   question_order: [string, string];
-  interrupt_in: UIType;
   prior: Record<string, number>;
   results: Record<string, PerQuestionResult>;
   pref_ui: UIType | null;

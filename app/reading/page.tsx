@@ -39,7 +39,6 @@ function ReadingInner() {
   const logChunkOpen = store.logChunkOpen;
   const logBookmark = store.logBookmark;
   const setInterrupt = store.setInterrupt;
-  const interrupt_in = store.interrupt_in;
 
   const enterTs = useRef(now());
   const triggerRef = useRef<InterruptTrigger>("auto");
@@ -57,7 +56,8 @@ function ReadingInner() {
   );
   triggerRef.current = trigger;
 
-  const shouldInterrupt = ui === interrupt_in && !interruptDone;
+  // 인터럽션은 기본/구조화 두 조건 모두에서 발생 (paired t-test 목적)
+  const shouldInterrupt = !interruptDone;
 
   useEffect(() => {
     if (content) ensureResult(qid, ui);

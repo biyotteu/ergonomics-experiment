@@ -8,7 +8,6 @@ function flatten(payload: any) {
     group: payload.group,
     ui_order: payload.ui_order?.join("|"),
     question_order: payload.question_order?.join("|"),
-    interrupt_in: payload.interrupt_in,
     pref_ui: payload.pref_ui ?? "",
     pref_reason: payload.pref_reason ?? "",
     started_at: payload.started_at,

@@ -5,19 +5,20 @@ export interface GroupSpec {
   group: GroupId;
   ui_order: [UIType, UIType];
   question_order: [string, string];
-  interrupt_in: UIType;
 }
 
+// 인터럽션은 두 조건(기본 UI / 구조화 UI) 모두에서 발생하므로
+// 카운터밸런싱은 UI 순서(2그룹) 또는 UI 순서 × 질문 순서(4그룹)로 구성한다.
 const TWO_GROUP: GroupSpec[] = [
-  { group: "G1", ui_order: ["basic", "structured"], question_order: ["A1", "B1"], interrupt_in: "basic" },
-  { group: "G2", ui_order: ["structured", "basic"], question_order: ["A1", "B1"], interrupt_in: "structured" },
+  { group: "G1", ui_order: ["basic", "structured"], question_order: ["A1", "B1"] },
+  { group: "G2", ui_order: ["structured", "basic"], question_order: ["A1", "B1"] },
 ];
 
 const FOUR_GROUP: GroupSpec[] = [
-  { group: "G1", ui_order: ["basic", "structured"], question_order: ["A1", "B1"], interrupt_in: "basic" },
-  { group: "G2", ui_order: ["basic", "structured"], question_order: ["A1", "B1"], interrupt_in: "structured" },
-  { group: "G3", ui_order: ["structured", "basic"], question_order: ["A1", "B1"], interrupt_in: "basic" },
-  { group: "G4", ui_order: ["structured", "basic"], question_order: ["A1", "B1"], interrupt_in: "structured" },
+  { group: "G1", ui_order: ["basic", "structured"], question_order: ["A1", "B1"] },
+  { group: "G2", ui_order: ["structured", "basic"], question_order: ["A1", "B1"] },
+  { group: "G3", ui_order: ["basic", "structured"], question_order: ["B1", "A1"] },
+  { group: "G4", ui_order: ["structured", "basic"], question_order: ["B1", "A1"] },
 ];
 
 export function getGroupSpecs(): GroupSpec[] {

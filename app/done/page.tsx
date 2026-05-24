@@ -22,7 +22,6 @@ export default function Done() {
           group: state.group,
           ui_order: state.ui_order,
           question_order: state.question_order,
-          interrupt_in: state.interrupt_in,
           prior: state.prior,
           results: state.results,
           pref_ui: state.pref_ui,

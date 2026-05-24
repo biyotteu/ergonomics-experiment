@@ -12,6 +12,10 @@ interface Props {
   bookmarked: boolean;
   onToggle: () => void;
   onBookmark: () => void;
+  /** 북마크 버튼 숨김 (퀴즈 오픈북 등) */
+  hideBookmark?: boolean;
+  /** 비유 박스 아래에 표시할 일반 안내 문구 (비유가 아닌 텍스트) */
+  note?: string;
 }
 
 /** 섹션 카드. 펼치면 [비유 → 본문 → 전환문구] 순서로 표시. */
@@ -26,6 +30,8 @@ export function ChunkCard({
   bookmarked,
   onToggle,
   onBookmark,
+  hideBookmark = false,
+  note,
 }: Props) {
   return (
     <div
@@ -67,31 +73,36 @@ export function ChunkCard({
             </div>
           )}
 
+          {/* 비유 박스 밖 일반 안내 문구 */}
+          {note && <p className="text-sm leading-6 text-muted mb-4">{note}</p>}
+
           <p className="text-[15px] leading-7 text-ink whitespace-pre-wrap">{body}</p>
 
           {transition && (
             <p className="mt-4 text-sm text-muted italic">→ {transition}</p>
           )}
 
-          <div className="mt-4">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onBookmark();
-              }}
-              className={`inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg border transition-colors ${
-                bookmarked
-                  ? "border-accent-600 text-accent-700 bg-accent-50"
-                  : "border-line text-muted hover:text-ink hover:border-zinc-300"
-              }`}
-            >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill={bookmarked ? "currentColor" : "none"}>
-                <path d="M3 1.5h8v11l-4-2.5-4 2.5v-11z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-              </svg>
-              {bookmarked ? "여기까지 읽었어요 ✓" : "여기까지 읽었어요"}
-            </button>
-          </div>
+          {!hideBookmark && (
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onBookmark();
+                }}
+                className={`inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg border transition-colors ${
+                  bookmarked
+                    ? "border-accent-600 text-accent-700 bg-accent-50"
+                    : "border-line text-muted hover:text-ink hover:border-zinc-300"
+                }`}
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill={bookmarked ? "currentColor" : "none"}>
+                  <path d="M3 1.5h8v11l-4-2.5-4 2.5v-11z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                </svg>
+                {bookmarked ? "여기까지 읽었어요 ✓" : "여기까지 읽었어요"}
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="px-6 pb-4 -mt-1">

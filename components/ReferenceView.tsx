@@ -1,7 +1,8 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import type { Chunk, UIType } from "@/lib/types";
 import { BLUFBox } from "./BLUFBox";
+import { ChunkCard } from "./ChunkCard";
 
 interface Props {
   ui: UIType;
@@ -12,9 +13,15 @@ interface Props {
 
 /**
  * 퀴즈 페이지 좌측의 오픈북 참조 자료.
- * 읽기 단계에서 본 UI 형태를 유지하되 모두 펼친 상태로 표시.
+ * - basic: 본문만 평문으로 표시
+ * - structured: BLUF + 섹션 카드(접기/펼치기 가능, 기본은 모두 펼침). 북마크 버튼은 숨김.
  */
 export function ReferenceView({ ui, question_text, chunks, blufText }: Props) {
+  // 구조화 자료: 기본적으로 모두 펼친 상태로 시작하되 접기/펼치기 가능
+  const [openMap, setOpenMap] = useState<Record<number, boolean>>(() =>
+    Object.fromEntries(chunks.map((c) => [c.chunk_order, true]))
+  );
+
   if (ui === "basic") {
     return (
       <article className="max-w-none">
@@ -34,38 +41,49 @@ export function ReferenceView({ ui, question_text, chunks, blufText }: Props) {
     );
   }
 
-  // structured: BLUF + 5섹션 (섹션별 비유 포함) 모두 펼침
+  // structured
+  const allOpen = chunks.every((c) => openMap[c.chunk_order]);
+  const toggleAll = () => {
+    const next = !allOpen;
+    setOpenMap(Object.fromEntries(chunks.map((c) => [c.chunk_order, next])));
+  };
+
   return (
     <div>
-      <div className="mb-4 pb-3 border-b border-line">
-        <div className="text-xs uppercase tracking-wider text-muted mb-1">질문</div>
-        <p className="text-sm text-ink m-0 font-medium">{question_text}</p>
+      <div className="mb-4 pb-3 border-b border-line flex items-start justify-between gap-3">
+        <div>
+          <div className="text-xs uppercase tracking-wider text-muted mb-1">질문</div>
+          <p className="text-sm text-ink m-0 font-medium">{question_text}</p>
+        </div>
+        <button
+          type="button"
+          onClick={toggleAll}
+          className="flex-shrink-0 text-xs text-accent-700 border border-line rounded-lg px-2.5 py-1.5 hover:bg-zinc-50"
+        >
+          {allOpen ? "모두 접기" : "모두 펼치기"}
+        </button>
       </div>
 
       <BLUFBox text={blufText} />
 
       <div className="space-y-3">
         {chunks.map((c) => (
-          <div
+          <ChunkCard
             key={c.chunk_order}
-            className="bg-card border border-line rounded-2xl p-5 shadow-card"
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-xs font-semibold text-muted tabular-nums">
-                섹션 {c.chunk_order} / {chunks.length}
-              </span>
-              <h3 className="font-semibold text-ink text-sm">{c.title}</h3>
-            </div>
-            {c.analogy && (
-              <div className="border border-dashed border-zinc-400 rounded-lg p-3 mb-3 bg-zinc-50">
-                <div className="text-xs font-semibold text-muted mb-1">
-                  공의 굴러내림으로 이해하기
-                </div>
-                <p className="text-[12.5px] leading-6 text-ink">{c.analogy}</p>
-              </div>
-            )}
-            <p className="text-[13.5px] leading-7 text-ink whitespace-pre-wrap">{c.body}</p>
-          </div>
+            order={c.chunk_order}
+            total={chunks.length}
+            title={c.title}
+            analogy={c.analogy}
+            body={c.body}
+            transition={c.transition}
+            open={!!openMap[c.chunk_order]}
+            bookmarked={false}
+            onToggle={() =>
+              setOpenMap((p) => ({ ...p, [c.chunk_order]: !p[c.chunk_order] }))
+            }
+            onBookmark={() => {}}
+            hideBookmark
+          />
         ))}
       </div>
     </div>

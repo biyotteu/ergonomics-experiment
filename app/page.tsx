@@ -30,7 +30,6 @@ export default function Home() {
       group: spec.group,
       ui_order: spec.ui_order,
       question_order: spec.question_order,
-      interrupt_in: spec.interrupt_in,
     });
     if (config.SHOW_PRIOR_KNOWLEDGE_SURVEY) router.push("/prior-knowledge");
     else router.push("/practice");

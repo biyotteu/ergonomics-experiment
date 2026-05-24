@@ -15,7 +15,6 @@ const empty: ParticipantState = {
   group: "G1",
   ui_order: ["basic", "structured"],
   question_order: ["A1", "B1"],
-  interrupt_in: "structured",
   prior: {},
   results: {},
   pref_ui: null,
