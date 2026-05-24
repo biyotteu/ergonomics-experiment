@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { RichText, TableBlock } from "./RichText";
 
 interface Props {
   order: number;
@@ -12,13 +13,12 @@ interface Props {
   bookmarked: boolean;
   onToggle: () => void;
   onBookmark: () => void;
-  /** 북마크 버튼 숨김 (퀴즈 오픈북 등) */
   hideBookmark?: boolean;
-  /** 비유 박스 아래에 표시할 일반 안내 문구 (비유가 아닌 텍스트) */
   note?: string;
+  table?: string;
 }
 
-/** 섹션 카드. 펼치면 [비유 → 본문 → 전환문구] 순서로 표시. */
+/** 섹션 카드. 펼치면 [비유 → 안내 → 본문 → 표 → 전환문구] 순. */
 export function ChunkCard({
   order,
   total,
@@ -32,6 +32,7 @@ export function ChunkCard({
   onBookmark,
   hideBookmark = false,
   note,
+  table,
 }: Props) {
   return (
     <div
@@ -63,7 +64,6 @@ export function ChunkCard({
 
       {open ? (
         <div className="px-6 pb-6 animate-slide-down">
-          {/* 섹션별 비유 (비유 먼저, 개념 설명 나중) */}
           {analogy && (
             <div className="border border-dashed border-zinc-400 rounded-xl p-4 mb-4 bg-zinc-50">
               <div className="text-xs font-semibold text-muted mb-1">
@@ -73,10 +73,10 @@ export function ChunkCard({
             </div>
           )}
 
-          {/* 비유 박스 밖 일반 안내 문구 */}
           {note && <p className="text-sm leading-6 text-muted mb-4">{note}</p>}
 
-          <p className="text-[15px] leading-7 text-ink whitespace-pre-wrap">{body}</p>
+          <RichText text={body} />
+          {table && <TableBlock table={table} />}
 
           {transition && (
             <p className="mt-4 text-sm text-muted italic">→ {transition}</p>

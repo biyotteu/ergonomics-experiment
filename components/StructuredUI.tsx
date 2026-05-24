@@ -78,6 +78,7 @@ export function StructuredUI({
               title={c.title}
               analogy={c.analogy}
               body={c.body}
+              table={c.table}
               transition={c.transition}
               open={!!openMap[c.chunk_order]}
               bookmarked={!!bookmarks[c.chunk_order]}

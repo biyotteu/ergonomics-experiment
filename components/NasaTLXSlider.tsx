@@ -3,20 +3,33 @@ import React from "react";
 
 export function NasaTLXSlider({
   label,
+  question,
   desc,
+  anchorLow,
+  anchorHigh,
   value,
   onChange,
 }: {
   label: string;
+  question: string;
   desc: string;
+  anchorLow: string;
+  anchorHigh: string;
   value: number;
   onChange: (n: number) => void;
 }) {
   return (
-    <div className="py-5 border-b border-line last:border-b-0">
-      <div className="flex items-baseline justify-between mb-1">
-        <label className="font-medium text-ink">{label}</label>
-        <span className="text-2xl font-semibold tabular-nums text-accent-700">{value}</span>
+    <div className="py-6 border-b border-line last:border-b-0">
+      <div className="flex items-start justify-between gap-4 mb-1">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted mb-1">
+            {label}
+          </div>
+          <p className="font-medium text-ink leading-relaxed">{question}</p>
+        </div>
+        <span className="text-2xl font-semibold tabular-nums text-accent-700 flex-shrink-0">
+          {value}
+        </span>
       </div>
       <p className="text-sm text-muted mb-3">{desc}</p>
       <input
@@ -27,11 +40,11 @@ export function NasaTLXSlider({
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
         className="tlx-slider"
-        style={{ ["--val" as any]: `${value}%` }}
+        style={{ ["--val" as never]: `${value}%` }}
       />
-      <div className="flex justify-between text-[11px] text-muted mt-1 tabular-nums">
-        <span>0 (매우 낮음)</span>
-        <span>100 (매우 높음)</span>
+      <div className="flex justify-between text-[11px] text-muted mt-1">
+        <span>0 · {anchorLow}</span>
+        <span>{anchorHigh} · 100</span>
       </div>
     </div>
   );

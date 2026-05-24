@@ -14,11 +14,8 @@ function TlxInner() {
   const router = useRouter();
   const sp = useSearchParams();
   const qid = sp.get("q") || "A1";
-  const ui = (sp.get("ui") || "basic") as UIType;
   const phase = Number(sp.get("phase") || "1");
   const setTlx = useExperimentStore((s) => s.setTlx);
-  const ui_order = useExperimentStore((s) => s.ui_order);
-  const question_order = useExperimentStore((s) => s.question_order);
 
   const [scores, setScores] = useState<TlxScores>({
     mental: 50, physical: 50, temporal: 50, performance: 50, effort: 50, frustration: 50,
@@ -26,27 +23,25 @@ function TlxInner() {
 
   const submit = () => {
     setTlx(qid, scores);
-    if (phase === 1) {
-      router.push("/break");
-    } else {
-      router.push("/survey");
-    }
+    if (phase === 1) router.push("/break");
+    else router.push("/survey");
   };
 
   return (
     <Container size="md">
       <Stepper step={phase === 1 ? 4 : 6} total={8} />
       <h1 className="text-2xl font-semibold mb-2">NASA-TLX 설문</h1>
-      <p className="text-muted mb-6">
-        방금 읽으신 응답과 퀴즈 과제 전반에 대해 답해주세요. 슬라이더로 0~100점 사이의 값을 선택하시면 됩니다.
-      </p>
+      <p className="text-sm text-muted mb-6 leading-relaxed">{config.TLX_INTRO}</p>
 
       <Card className="p-6">
         {config.TLX_DIMENSIONS.map((d) => (
           <NasaTLXSlider
             key={d.key}
             label={d.label}
+            question={d.question}
             desc={d.desc}
+            anchorLow={d.anchorLow}
+            anchorHigh={d.anchorHigh}
             value={scores[d.key as keyof TlxScores]}
             onChange={(n) => setScores((s) => ({ ...s, [d.key]: n }))}
           />

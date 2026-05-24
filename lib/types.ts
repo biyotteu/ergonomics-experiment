@@ -31,6 +31,7 @@ export interface Chunk {
   analogy: string;   // 섹션별 "공의 굴러내림으로 이해하기" 비유
   body: string;
   transition: string;
+  table?: string;   // 마크다운 파이프 표 (선택). 첫 줄 헤더.
 }
 
 /** BLUF는 한 단락 텍스트 */
