@@ -11,7 +11,7 @@ type TlxDimension = {
 
 export const config = {
   // 카운터밸런싱 그룹 수 (2 또는 4)
-  COUNTERBALANCE_GROUPS: 2 as 2 | 4,
+  COUNTERBALANCE_GROUPS: 4 as 2 | 4,
 
   // 사전 배경지식 설문 표시 여부
   SHOW_PRIOR_KNOWLEDGE_SURVEY: true,
