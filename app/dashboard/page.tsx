@@ -46,6 +46,7 @@ function isNumericColumn(key: string): boolean {
   if (NUMERIC_COL_EXACT.includes(key)) return true;
   if (NUMERIC_COL_SUFFIXES.some((s) => key.endsWith(s))) return true;
   if (key.startsWith("prior_")) return true;
+  if (/_quiz_score_\d+$/.test(key)) return true;  // q1_quiz_score_3, q2_quiz_score_4 등 모두 숫자
   return false;
 }
 
@@ -171,10 +172,16 @@ function DashboardBody({ rows, onReload }: { rows: Row[]; onReload: () => void }
     tlx_effort: pairByUI(rows, (r, p) => toNumber(r[`${p}_tlx_effort`])),
     tlx_frustration: pairByUI(rows, (r, p) => toNumber(r[`${p}_tlx_frustration`])),
     quiz_score: pairByUI(rows, (r, p) => {
-      const s1 = toNumber(r[`${p}_quiz_score_1`]);
-      const s2 = toNumber(r[`${p}_quiz_score_2`]);
-      if (!Number.isFinite(s1) || !Number.isFinite(s2)) return null;
-      return s1 + s2;
+      // 모든 ${p}_quiz_score_N 컬럼을 합산. 한 문항이라도 비어있으면 null.
+      const keys = Object.keys(r).filter((k) => k.startsWith(`${p}_quiz_score_`));
+      if (keys.length === 0) return null;
+      let total = 0;
+      for (const k of keys) {
+        const v = toNumber(r[k]);
+        if (!Number.isFinite(v)) return null;
+        total += v;
+      }
+      return total;
     }),
   };
 
@@ -322,22 +329,37 @@ function DashboardBody({ rows, onReload }: { rows: Row[]; onReload: () => void }
             </p>
           </Card>
 
-          {pairs.quiz_score.basic.length > 0 && (
-            <Card className="p-6 mb-6">
-              <h2 className="font-semibold mb-1">퀴즈 점수 (수동 채점)</h2>
-              <p className="text-xs text-muted mb-4">
-                quiz_score_1, quiz_score_2 컬럼에 채점 결과를 넣으면 자동 집계됩니다. 두 문항 합산 0~2점.
-              </p>
-              <BarCompare
-                label="평균 점수 (0~2)"
-                basicValue={mean(pairs.quiz_score.basic)}
-                structuredValue={mean(pairs.quiz_score.structured)}
-                basicSd={std(pairs.quiz_score.basic)}
-                structuredSd={std(pairs.quiz_score.structured)}
-                maxValue={2}
-              />
-            </Card>
-          )}
+          {pairs.quiz_score.basic.length > 0 && (() => {
+            // 응답 데이터에서 quiz_score_N 컬럼의 최대 N을 찾아 max 점수로 사용
+            let maxN = 0;
+            for (const r of rows) {
+              for (const k of Object.keys(r)) {
+                const m = /_quiz_score_(\d+)$/.exec(k);
+                if (m) {
+                  const n = parseInt(m[1], 10);
+                  if (n > maxN) maxN = n;
+                }
+              }
+            }
+            const maxScore = Math.max(maxN, 1);
+            return (
+              <Card className="p-6 mb-6">
+                <h2 className="font-semibold mb-1">퀴즈 점수 (수동 채점)</h2>
+                <p className="text-xs text-muted mb-4">
+                  quiz_score_1, quiz_score_2, ... 컬럼에 채점 결과를 넣으면 자동 집계됩니다.
+                  현재 {maxScore}문항 합산 0~{maxScore}점.
+                </p>
+                <BarCompare
+                  label={`평균 점수 (0~${maxScore})`}
+                  basicValue={mean(pairs.quiz_score.basic)}
+                  structuredValue={mean(pairs.quiz_score.structured)}
+                  basicSd={std(pairs.quiz_score.basic)}
+                  structuredSd={std(pairs.quiz_score.structured)}
+                  maxValue={maxScore}
+                />
+              </Card>
+            );
+          })()}
 
           <Card className="p-6 mb-6">
             <h2 className="font-semibold mb-1">Paired t-test 결과</h2>

@@ -1,5 +1,5 @@
 "use client";
-import React, { Suspense, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Container } from "@/components/Container";
 import { Button } from "@/components/Button";
@@ -22,12 +22,31 @@ function QuizInner() {
   const updateResult = useExperimentStore((s) => s.updateResult);
   const { content, loading } = useContent();
   const enterTs = useRef(now());
-  const [a1, setA1] = useState("");
-  const [a2, setA2] = useState("");
+
+  // 답안 배열 (문항 개수에 맞춰 동적). 각 문항이 독립적으로 관리됨.
+  const [answers, setAnswers] = useState<string[]>([]);
+
+  const quiz = content ? findQuiz(content, qid) : [];
+
+  // 콘텐츠 로드 후 문항 개수만큼 빈 배열 초기화
+  useEffect(() => {
+    if (quiz.length > 0 && answers.length !== quiz.length) {
+      setAnswers(new Array(quiz.length).fill(""));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quiz.length]);
+
+  const updateAnswer = (i: number, value: string) => {
+    setAnswers((prev) => {
+      const next = prev.slice();
+      next[i] = value;
+      return next;
+    });
+  };
 
   const submit = () => {
     const elapsed = now() - enterTs.current;
-    updateResult(qid, { quiz_ans_1: a1, quiz_ans_2: a2, quiz_time_auto_ms: elapsed });
+    updateResult(qid, { quiz_answers: answers, quiz_time_auto_ms: elapsed });
     router.push(`/tlx?q=${qid}&ui=${ui}&phase=${phase}`);
   };
 
@@ -42,7 +61,6 @@ function QuizInner() {
   const question = findQuestion(content, qid);
   const chunks = findChunks(content, qid);
   const bluf = findBluf(content, qid);
-  const quiz = findQuiz(content, qid);
 
   if (!question || !bluf) {
     return (
@@ -52,6 +70,8 @@ function QuizInner() {
     );
   }
 
+  const allAnswered = quiz.length > 0 && answers.length === quiz.length && answers.every((a) => a.trim() !== "");
+
   return (
     <Container size="xl">
       <Stepper step={phase === 1 ? 5 : 7} total={9} />
@@ -59,7 +79,7 @@ function QuizInner() {
       <div className="mb-6">
         <h1 className="text-2xl font-semibold mb-1">퀴즈 (오픈북)</h1>
         <p className="text-sm text-muted">
-          왼쪽 자료를 자유롭게 참고하면서 오른쪽 두 문항에 답해주세요.
+          왼쪽 자료를 자유롭게 참고하면서 오른쪽 문항에 답해주세요. 각 문항은 독립적으로 작성합니다.
         </p>
       </div>
 
@@ -77,7 +97,7 @@ function QuizInner() {
           />
         </div>
 
-        {/* 우측: 퀴즈 폼 */}
+        {/* 우측: 퀴즈 폼 — 문항마다 독립 textarea */}
         <div>
           {quiz.map((q, i) => (
             <Card key={q.q_order} className="p-5 mb-4">
@@ -87,8 +107,8 @@ function QuizInner() {
               <p className="font-medium text-ink mb-4 leading-relaxed">{q.question_text}</p>
               <textarea
                 rows={5}
-                value={i === 0 ? a1 : a2}
-                onChange={(e) => (i === 0 ? setA1(e.target.value) : setA2(e.target.value))}
+                value={answers[i] ?? ""}
+                onChange={(e) => updateAnswer(i, e.target.value)}
                 className="w-full border border-line rounded-xl px-4 py-3 text-sm leading-relaxed focus:outline-none focus:border-accent-600 focus:ring-2 focus:ring-accent-100 resize-none"
                 placeholder="답안을 작성해주세요"
               />
@@ -96,7 +116,7 @@ function QuizInner() {
           ))}
 
           <div className="flex justify-end">
-            <Button onClick={submit} disabled={a1.trim() === "" || a2.trim() === ""}>
+            <Button onClick={submit} disabled={!allAnswered}>
               제출하고 다음으로 →
             </Button>
           </div>

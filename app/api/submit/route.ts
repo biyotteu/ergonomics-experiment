@@ -15,7 +15,7 @@ function flatten(payload: any) {
     passage_read_time_ms: payload.passage_read_time_ms ?? "",
   };
 
-  // 사전 설문: prior 객체를 prior_<key> 컬럼으로 평탄화
+  // 사전 설문
   const prior = payload.prior || {};
   Object.entries(prior).forEach(([k, v]) => {
     out[`prior_${k}`] = v ?? "";
@@ -37,8 +37,13 @@ function flatten(payload: any) {
     out[`${p}_interrupt_delay_used_ms`] = r.interrupt_delay_used_ms ?? "";
     out[`${p}_arithmetic_correct`] =
       r.arithmetic_correct === null ? "" : r.arithmetic_correct ? 1 : 0;
-    out[`${p}_quiz_ans1`] = r.quiz_ans_1;
-    out[`${p}_quiz_ans2`] = r.quiz_ans_2;
+
+    // 퀴즈 답안: 문항 개수만큼 quiz_ans1, quiz_ans2, ... 컬럼으로 펼침
+    const answers: string[] = Array.isArray(r.quiz_answers) ? r.quiz_answers : [];
+    answers.forEach((ans, i) => {
+      out[`${p}_quiz_ans${i + 1}`] = ans;
+    });
+
     out[`${p}_quiz_time_auto_ms`] = r.quiz_time_auto_ms;
     out[`${p}_quiz_time_manual_s`] = r.quiz_time_manual_s ?? "";
     out[`${p}_tlx_mental`] = r.tlx?.mental;

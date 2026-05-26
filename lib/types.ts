@@ -77,8 +77,7 @@ export interface PerQuestionResult {
   chunk_open_log: { chunk_order: number; ts: number }[];
   bookmark_log: { chunk_order: number; ts: number }[];
   resumption_lag_ms: number | null;
-  quiz_ans_1: string;
-  quiz_ans_2: string;
+  quiz_answers: string[];   // N문항 가변. 인덱스 0 = 문항 1
   quiz_time_auto_ms: number;
   quiz_time_manual_s: number | null;
   tlx: TlxScores;
