@@ -21,7 +21,7 @@ export default function Survey() {
 
   return (
     <Container size="md">
-      <Stepper step={7} total={8} />
+      <Stepper step={8} total={9} />
       <h1 className="text-2xl font-semibold mb-2">마무리 인터뷰</h1>
       <p className="text-muted mb-6">
         간단한 질문 두 개로 실험이 마무리됩니다.

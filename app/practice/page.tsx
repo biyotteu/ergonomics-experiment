@@ -48,12 +48,12 @@ export default function Practice() {
   const [bm, setBm] = useState<Record<number, boolean>>({});
 
   const startReal = () => {
-    router.push(`/reading?q=${question_order[0]}&ui=${ui_order[0]}&phase=1`);
+    router.push("/passage");
   };
 
   return (
     <Container size="lg">
-      <Stepper step={3} total={8} />
+      <Stepper step={3} total={9} />
       <h1 className="text-2xl font-semibold mb-2">연습</h1>
       <p className="text-muted mb-6">
         본 실험에서 사용할 인터페이스를 미리 익혀봅니다. 데이터는 기록되지 않습니다.

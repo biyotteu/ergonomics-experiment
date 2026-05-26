@@ -94,6 +94,7 @@ export interface ParticipantState {
   ui_order: [UIType, UIType];
   question_order: [string, string];
   prior: Record<string, number>;
+  passage_read_time_ms: number;
   results: Record<string, PerQuestionResult>;
   pref_ui: UIType | null;
   pref_reason: string;

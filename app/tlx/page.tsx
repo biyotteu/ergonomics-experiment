@@ -29,7 +29,7 @@ function TlxInner() {
 
   return (
     <Container size="md">
-      <Stepper step={phase === 1 ? 4 : 6} total={8} />
+      <Stepper step={phase === 1 ? 5 : 7} total={9} />
       <h1 className="text-2xl font-semibold mb-2">NASA-TLX 설문</h1>
       <p className="text-sm text-muted mb-6 leading-relaxed">{config.TLX_INTRO}</p>
 

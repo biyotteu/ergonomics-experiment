@@ -23,6 +23,7 @@ export default function Done() {
           ui_order: state.ui_order,
           question_order: state.question_order,
           prior: state.prior,
+          passage_read_time_ms: state.passage_read_time_ms,
           results: state.results,
           pref_ui: state.pref_ui,
           pref_reason: state.pref_reason,
@@ -54,7 +55,7 @@ export default function Done() {
 
   return (
     <Container size="md">
-      <Stepper step={8} total={8} />
+      <Stepper step={9} total={9} />
       <Card className="p-10 text-center">
         <div className="text-5xl mb-3" aria-hidden>✓</div>
         <h1 className="text-2xl font-semibold mb-2">실험이 끝났습니다</h1>

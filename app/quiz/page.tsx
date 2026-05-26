@@ -54,7 +54,7 @@ function QuizInner() {
 
   return (
     <Container size="xl">
-      <Stepper step={phase === 1 ? 4 : 6} total={8} />
+      <Stepper step={phase === 1 ? 5 : 7} total={9} />
 
       <div className="mb-6">
         <h1 className="text-2xl font-semibold mb-1">퀴즈 (오픈북)</h1>

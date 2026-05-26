@@ -50,7 +50,7 @@ export default function Home() {
 
   return (
     <Container size="md">
-      <Stepper step={1} total={8} />
+      <Stepper step={1} total={9} />
       <div className="mb-2">
         <h1 className="text-3xl font-semibold tracking-tight mb-2">
           인지부하 비교 실험에 참여해주셔서 감사합니다

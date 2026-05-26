@@ -28,7 +28,7 @@ export default function Break() {
 
   return (
     <Container size="md">
-      <Stepper step={5} total={8} />
+      <Stepper step={6} total={9} />
       <h1 className="text-2xl font-semibold mb-2">짧은 휴식</h1>
       <p className="text-muted mb-6">
         잠시 쉬어가세요. 다음 조건에서는 반대 UI로 진행됩니다.

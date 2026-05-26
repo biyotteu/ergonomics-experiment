@@ -12,6 +12,7 @@ function flatten(payload: any) {
     pref_reason: payload.pref_reason ?? "",
     started_at: payload.started_at,
     submitted_at: payload.submitted_at,
+    passage_read_time_ms: payload.passage_read_time_ms ?? "",
   };
 
   // 사전 설문: prior 객체를 prior_<key> 컬럼으로 평탄화

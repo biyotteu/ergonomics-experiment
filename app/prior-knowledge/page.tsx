@@ -71,7 +71,7 @@ export default function PriorKnowledge() {
     // 시트에 항목이 비어 있으면 페이지 자체 스킵
     return (
       <Container size="md">
-        <Stepper step={2} total={8} />
+        <Stepper step={2} total={9} />
         <h1 className="text-2xl font-semibold mb-2">사전 설문</h1>
         <p className="text-muted mb-6">
           설문 항목이 없습니다. 다음 단계로 진행해주세요.
@@ -83,7 +83,7 @@ export default function PriorKnowledge() {
 
   return (
     <Container size="md">
-      <Stepper step={2} total={8} />
+      <Stepper step={2} total={9} />
       <h1 className="text-2xl font-semibold mb-2">사전 배경지식 설문</h1>
       <p className="text-muted mb-6">
         실험 결과 해석을 위한 보조 정보로만 사용됩니다. 솔직하게 답해주세요.

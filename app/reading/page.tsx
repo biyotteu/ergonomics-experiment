@@ -151,7 +151,7 @@ function ReadingInner() {
 
   return (
     <Container size="xl">
-      <Stepper step={phase === 1 ? 4 : 6} total={8} />
+      <Stepper step={phase === 1 ? 5 : 7} total={9} />
       <div className="mb-6">
         <div className="text-xs uppercase tracking-wider text-muted">조건 {phase}</div>
         <div className="text-sm font-medium text-ink">
