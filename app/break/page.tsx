@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Container } from "@/components/Container";
 import { Button } from "@/components/Button";
@@ -7,12 +7,17 @@ import { Card } from "@/components/Card";
 import { Stepper } from "@/components/Stepper";
 import { useExperimentStore } from "@/lib/store";
 import { config } from "@/lib/config";
+import { now } from "@/lib/timing";
 
 export default function Break() {
   const router = useRouter();
   const [left, setLeft] = useState<number>(config.BREAK_DURATION_SEC);
   const ui_order = useExperimentStore((s) => s.ui_order);
   const question_order = useExperimentStore((s) => s.question_order);
+  const setBreakDuration = useExperimentStore((s) => s.setBreakDuration);
+
+  // 페이지 진입 시각 (휴식 시간 측정 기준)
+  const enterTs = useRef(now());
 
   useEffect(() => {
     const t = setInterval(() => setLeft((s) => Math.max(0, s - 1)), 1000);
@@ -20,6 +25,7 @@ export default function Break() {
   }, []);
 
   const go = () => {
+    setBreakDuration(now() - enterTs.current);
     router.push(`/reading?q=${question_order[1]}&ui=${ui_order[1]}&phase=2`);
   };
 

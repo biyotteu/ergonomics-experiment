@@ -17,6 +17,7 @@ const empty: ParticipantState = {
   question_order: ["A1", "B1"],
   prior: {},
   passage_read_time_ms: 0,
+  break_duration_ms: 0,
   results: {},
   pref_ui: null,
   pref_reason: "",
@@ -28,6 +29,7 @@ interface Store extends ParticipantState {
   reset: () => void;
   setPrior: (prior: Record<string, number>) => void;
   setPassageReadTime: (ms: number) => void;
+  setBreakDuration: (ms: number) => void;
   ensureResult: (qid: string, ui: UIType) => void;
   updateResult: (qid: string, patch: Partial<PerQuestionResult>) => void;
   logChunkOpen: (qid: string, chunk_order: number) => void;
@@ -68,6 +70,7 @@ export const useExperimentStore = create<Store>()(
       reset: () => set({ ...empty }),
       setPrior: (prior) => set({ prior }),
       setPassageReadTime: (ms) => set({ passage_read_time_ms: ms }),
+      setBreakDuration: (ms) => set({ break_duration_ms: ms }),
       ensureResult: (qid, ui) => {
         const cur = get().results[qid];
         if (!cur) {

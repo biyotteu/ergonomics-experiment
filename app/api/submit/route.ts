@@ -13,6 +13,7 @@ function flatten(payload: any) {
     started_at: payload.started_at,
     submitted_at: payload.submitted_at,
     passage_read_time_ms: payload.passage_read_time_ms ?? "",
+    break_duration_ms: payload.break_duration_ms ?? "",
   };
 
   // 사전 설문

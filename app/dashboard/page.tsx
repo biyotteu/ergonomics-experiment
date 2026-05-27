@@ -34,7 +34,7 @@ const NUMERIC_COL_SUFFIXES = [
   "tlx_frustration",
 ];
 
-const NUMERIC_COL_EXACT = ["passage_read_time_ms"];
+const NUMERIC_COL_EXACT = ["passage_read_time_ms", "break_duration_ms"];
 
 function toNumber(v: any): number {
   if (v === "" || v === null || v === undefined) return NaN;
@@ -154,6 +154,9 @@ function DashboardBody({ rows, onReload }: { rows: Row[]; onReload: () => void }
 
   const passageTimes = rows
     .map((r) => toNumber(r.passage_read_time_ms))
+    .filter((v) => Number.isFinite(v));
+  const breakTimes = rows
+    .map((r) => toNumber(r.break_duration_ms))
     .filter((v) => Number.isFinite(v));
 
   const pairs = {
@@ -276,6 +279,14 @@ function DashboardBody({ rows, onReload }: { rows: Row[]; onReload: () => void }
                 <span className="font-medium">지문 읽기 시간 (양 조건 공통)</span>
                 <span className="text-muted ml-3">
                   평균 {fmtNum(mean(passageTimes) / 1000)}s · 표준편차 {fmtNum(std(passageTimes) / 1000)}s · n={passageTimes.length}
+                </span>
+              </div>
+            )}
+            {breakTimes.length > 0 && (
+              <div className="mt-2 text-sm">
+                <span className="font-medium">휴식 시간 (조건 1 → 조건 2 사이)</span>
+                <span className="text-muted ml-3">
+                  평균 {fmtNum(mean(breakTimes) / 1000)}s · 표준편차 {fmtNum(std(breakTimes) / 1000)}s · n={breakTimes.length}
                 </span>
               </div>
             )}
@@ -404,6 +415,7 @@ function DashboardBody({ rows, onReload }: { rows: Row[]; onReload: () => void }
                     <th className="py-2 pr-3">질문 순서</th>
                     <th className="py-2 pr-3">선호</th>
                     <th className="py-2 pr-3">지문 시간(s)</th>
+                    <th className="py-2 pr-3">휴식 시간(s)</th>
                     {priorColumns.map((c) => (
                       <th key={c} className="py-2 pr-3">
                         사전({c.replace("prior_", "")})
@@ -423,6 +435,11 @@ function DashboardBody({ rows, onReload }: { rows: Row[]; onReload: () => void }
                       <td className="py-1.5 pr-3 tabular-nums">
                         {Number.isFinite(toNumber(r.passage_read_time_ms))
                           ? fmtNum(toNumber(r.passage_read_time_ms) / 1000)
+                          : "—"}
+                      </td>
+                      <td className="py-1.5 pr-3 tabular-nums">
+                        {Number.isFinite(toNumber(r.break_duration_ms))
+                          ? fmtNum(toNumber(r.break_duration_ms) / 1000)
                           : "—"}
                       </td>
                       {priorColumns.map((c) => (

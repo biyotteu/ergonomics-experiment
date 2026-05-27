@@ -24,6 +24,7 @@ export default function Done() {
           question_order: state.question_order,
           prior: state.prior,
           passage_read_time_ms: state.passage_read_time_ms,
+          break_duration_ms: state.break_duration_ms,
           results: state.results,
           pref_ui: state.pref_ui,
           pref_reason: state.pref_reason,
